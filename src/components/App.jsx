@@ -4,14 +4,33 @@ import Ducks from "./Ducks";
 import Login from "./Login";
 import MyProfile from "./MyProfile";
 import Register from "./Register";
+import ProtectedRoute from "./ProtectedRoute";
 import "./styles/App.css";
 function App() {
-  const { isLoggedIn, setisLoggedIn } = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   return (
     <Routes>
-      <Route path="/ducks" element={<Ducks />} />
-      <Route path="/my-profile" element={<MyProfile />} />
+      {/* Envuelve Ducks en ProtectedRoute y pasa isLoggedIn como propiedad. */}
+      <Route
+        path="/ducks"
+        element={
+          <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <Ducks />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Envuelve MyProfile en ProtectedRoute y pasa isLoggedIn como propiedad. */}
+      <Route
+        path="/my-profile"
+        element={
+          <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <MyProfile />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/login"
         element={
