@@ -3,7 +3,8 @@ import { useState } from "react";
 import Logo from "./Logo";
 import "./styles/Register.css";
 
-const Register = () => {
+// Desestructurar la propiedad.
+const Register = ({ handleRegistration }) => {
   const [data, setData] = useState({
     username: "",
     email: "",
@@ -11,6 +12,9 @@ const Register = () => {
     confirmPassword: "",
   });
 
+  // La función se activa siempre que se cambie una entrada y actualiza
+  // el valor de la entrada modificada. Observa que las claves de este
+  // objeto coinciden con el nombre de los atributos de las entradas correspondientes.
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData((prevData) => ({
@@ -19,11 +23,16 @@ const Register = () => {
     }));
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleRegistration(data);
+  };
+
   return (
     <div className="register">
       <Logo title={"CryptoDucks"} />
       <p className="register__welcome">Regístrate</p>
-      <form className="register__form">
+      <form className="register__form" onSubmit={handleSubmit}>
         <label htmlFor="username">Username:</label>
         <input
           id="username"
@@ -64,7 +73,7 @@ const Register = () => {
       </form>
       <div className="register__signin">
         <p>¿Ya eres miembro?</p>
-        <Link to="login" className="register__login-link">
+        <Link to="/login" className="register__login-link">
           Inicia sesión aquí
         </Link>
       </div>
