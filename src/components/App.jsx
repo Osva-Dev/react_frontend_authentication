@@ -20,7 +20,6 @@ function App() {
   const [userData, setUserData] = useState({ username: "", email: "" });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
-
   const location = useLocation();
 
   const handleRegistration = ({
@@ -51,10 +50,7 @@ function App() {
           setToken(data.jwt);
           setUserData(data.user);
           setIsLoggedIn(true);
-          // Después de iniciar sesión, en lugar de navegar todo el tiempo a /ducks,
-          // navega a la ubicación que se almacena en state. Si
-          // no hay ubicación almacenada, por defecto
-          // redirigimos a /ducks.
+
           const redirectPath = location.state?.from?.pathname || "/ducks";
           navigate(redirectPath);
         }
@@ -74,8 +70,6 @@ function App() {
       .then(({ username, email }) => {
         setIsLoggedIn(true);
         setUserData({ username, email });
-        // Elimina la llamada al hook navigate(): ya no es
-        // necesario.
       })
       .catch(console.error);
   }, []);
@@ -86,7 +80,7 @@ function App() {
         path="/ducks"
         element={
           <ProtectedRoute isLoggedIn={isLoggedIn}>
-            <Ducks />
+            <Ducks setIsLoggedIn={setIsLoggedIn} />
           </ProtectedRoute>
         }
       />
@@ -95,13 +89,11 @@ function App() {
         path="/my-profile"
         element={
           <ProtectedRoute isLoggedIn={isLoggedIn}>
-            <MyProfile userData={userData} />
+            <MyProfile userData={userData} setIsLoggedIn={setIsLoggedIn} />
           </ProtectedRoute>
         }
       />
-      {/* Envuelve la ruta /login en una ProtectedRoute. Asegúrate de
-      especificar la prop anoymous, para redirigir a los usuarios conectados
-      a "/". */}
+
       <Route
         path="/login"
         element={
@@ -112,9 +104,7 @@ function App() {
           </ProtectedRoute>
         }
       />
-      {/* Envuelve la ruta /register en una ProtectedRoute. Asegúrate de
-      especificar la prop anoymous, para redirigir a los usuarios conectados
-      a "/". */}
+
       <Route
         path="/register"
         element={
