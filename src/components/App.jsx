@@ -1,4 +1,10 @@
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { useState, useEffect } from "react";
 import Ducks from "./Ducks";
 import Login from "./Login";
@@ -13,8 +19,9 @@ import "./styles/App.css";
 function App() {
   const [userData, setUserData] = useState({ username: "", email: "" });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   const navigate = useNavigate();
+
+  const location = useLocation();
 
   const handleRegistration = ({
     username,
@@ -26,7 +33,6 @@ function App() {
       auth
         .register(username, password, email)
         .then(() => {
-          console.log("Registro Exitoso...");
           navigate("/login");
         })
         .catch(console.error);
@@ -42,14 +48,18 @@ function App() {
       .authorize(username, password)
       .then((data) => {
         if (data.jwt) {
-          // Guarda el token en el almacenamiento local
           setToken(data.jwt);
           setUserData(data.user);
           setIsLoggedIn(true);
-          navigate("/ducks");
+          // Después de iniciar sesión, en lugar de navegar todo el tiempo a /ducks,
+          // navega a la ubicación que se almacena en state. Si
+          // no hay ubicación almacenada, por defecto
+          // redirigimos a /ducks.
+          const redirectPath = location.state?.from?.pathname || "/ducks";
+          navigate(redirectPath);
         }
       })
-      .catch((err) => console.log(err));
+      .catch(console.error);
   };
 
   useEffect(() => {
@@ -59,15 +69,13 @@ function App() {
       return;
     }
 
-    // Llama a la función, pasándole el JWT.
     api
       .getUserInfo(jwt)
       .then(({ username, email }) => {
-        // si la respuesta es exitosa, inicia la sesión del usuario, guarda sus
-        // datos en el estado y lo dirige a /ducks.
         setIsLoggedIn(true);
         setUserData({ username, email });
-        navigate("/ducks");
+        // Elimina la llamada al hook navigate(): ya no es
+        // necesario.
       })
       .catch(console.error);
   }, []);
@@ -91,22 +99,30 @@ function App() {
           </ProtectedRoute>
         }
       />
-
+      {/* Envuelve la ruta /login en una ProtectedRoute. Asegúrate de
+      especificar la prop anoymous, para redirigir a los usuarios conectados
+      a "/". */}
       <Route
         path="/login"
         element={
-          <div className="loginContainer">
-            <Login handleLogin={handleLogin} />
-          </div>
+          <ProtectedRoute isLoggedIn={isLoggedIn} anonymous>
+            <div className="loginContainer">
+              <Login handleLogin={handleLogin} />
+            </div>
+          </ProtectedRoute>
         }
       />
-
+      {/* Envuelve la ruta /register en una ProtectedRoute. Asegúrate de
+      especificar la prop anoymous, para redirigir a los usuarios conectados
+      a "/". */}
       <Route
         path="/register"
         element={
-          <div className="registerContainer">
-            <Register handleRegistration={handleRegistration} />
-          </div>
+          <ProtectedRoute isLoggedIn={isLoggedIn} anonymous>
+            <div className="registerContainer">
+              <Register handleRegistration={handleRegistration} />
+            </div>
+          </ProtectedRoute>
         }
       />
 
